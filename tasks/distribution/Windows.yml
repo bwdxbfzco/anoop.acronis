@@ -1,0 +1,18 @@
+---
+# tasks file for acronis
+ - name: Create directory for download acronis agent
+   win_file:
+     path: "{{getdir}}"
+     state: directory
+
+ - name: Download the Acronis Agent package
+   win_get_url:
+     url: https://bwdl.s3.eu-central.stackpathstorage.com/{{agent_msi_file}}
+     dest: "{{getdir}}"
+    
+ - name: Install an MSI file
+   win_package:
+     path:  '{{getdir}}\{{agent_msi_file}}'
+     product_id: none
+     arguments: ' /ADDLOCAL=AgentsCoreComponents /TARGETDIR={{target_dir}} /CURRENT_LANGUAGE=en /ACEP_AGREEMENT=1 /RAIN_ADDRESS='{{acronis_cloud_url}}' /LOGIN_FOR_RAIN ='{{acronis_username}}' /PASSWORD_FOR_RAIN='{{acronis_password}}' /MANAGEMENT_SERVER_ADDRESS={{acronisip}} /AMS_SERVICE_PASSWORD="{{acronis_pass}}" /AMS_SERVICE_USERNAME="{{acronis_user}}"'
+     state: present

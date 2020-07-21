@@ -1,0 +1,69 @@
+---
+# tasks file for acronis
+
+- name: check if acronis is installed
+  command: acrocmd help
+  register: result
+  ignore_errors: true
+  changed_when: false
+
+- name: Create APP Directory
+  become: yes
+  file: path={{acronis_path}} state=directory
+  
+- name: Install Acronis dependencies | Centos 
+  yum:
+    name:
+      - gcc
+      - make
+      - kernel-devel
+      - rpm
+    state: latest
+    update_cache: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  ignore_errors: yes
+- name: Install Acronis dependencies | Ubuntu
+  apt:
+    pkg:
+    - gcc
+    - make
+    - rpm
+    state: latest
+    update_cache: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  ignore_errors: yes
+  tags:
+    - ubuntu
+- name: install linux linux-headers | Ubuntu
+  action: shell apt-get install -y linux-headers-$(uname -r) alien
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  ignore_errors: yes
+  no_log: True
+  tags:
+    - ubuntu
+
+- name: install linux linux-Images | Ubuntu
+  action: shell apt-get install -y linux-image-$(uname -r) alien
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  ignore_errors: True
+  no_log: True
+  tags:
+    - ubuntu
+    
+
+- name: download acronis agent
+  become: yes
+  get_url:
+    url: '{{acronis_url}}{{acronis_bin}}'
+    dest: '{{acronis_path}}'
+    mode: '0755'
+  ignore_errors: true
+- name: Fix 'support_tools' permissions
+  shell: chmod 755 '{{acronis_path}}'/'{{acronis_bin}}'
+  
+- name: install package acronis agent 
+  become: yes
+  command: ./'{{acronis_bin}}' -a --id BackupAndRecoveryAgent -C {{acronis_ip}} --language '{{lang}}' --login '{{acronis_user}}' --password '{{acronis_pass}}' 
+  args:
+    chdir: '{{acronis_path}}'
+  ignore_errors: true

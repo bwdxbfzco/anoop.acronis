@@ -1,0 +1,7 @@
+---
+# vars file for acronis client
+acronis_ip: "cloudbackup.apps.ae"
+acronis_path: "/tmp/acronis"
+acronis_url: "https://bwdl.s3.eu-central.stackpathstorage.com/"
+acronis_bin: "Backup_Agent_Linux.bin"
+lang: "en"
